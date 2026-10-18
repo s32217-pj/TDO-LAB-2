@@ -6,11 +6,29 @@ jobs:
   hello:
     runs-on: ubuntu-24.04
     steps:
-    
-      - name: Przywitaj się
-        shell: bash
-        run: echo "Hello, World!"
 
-      - name: Show Current Date
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Test .NET&Node
         shell: bash
-        run: date
+        run: |
+          test -f MissionControl.slnx
+          test -f global.json
+          test -f .nvmrc
+          dotnet --version
+          node --version
+          npm --version
+    
+      - name: Read project files
+        shell: bash
+        run: |
+          pwd
+          ls -la
