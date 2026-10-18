@@ -1,5 +1,7 @@
 # Laboratorium 02 — CI i GitHub Actions
 
+## He he mala zmiana w readme
+
 Publiczny template do drugiego laboratorium Technologie DevOps.
 
 - [Instrukcja laboratorium — 23 zadania](https://pjmpr.github.io/TDO-lecures/labs/ci/)
