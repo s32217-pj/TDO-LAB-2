@@ -1,10 +1,29 @@
 name: Mission Control CI
 
+run-name: "${{ github.event_name }} - ${{ inputs.configuration || 'Release' }}"
+
 on: 
   push:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+
+      configuration:
+        description: Build configuration
+        type: choice
+        options:
+          - Release
+          - Debug
+        default: Release
+        required: true
+
+      extra_diagnostics:
+        description: Enable extra diagnostics
+        type: boolean
+        default: false
+        required: true
 
 jobs:
   hello:
@@ -30,6 +49,16 @@ jobs:
           dotnet --version
           node --version
           npm --version
+
+      - name: Extra diagnostics
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.extra_diagnostics }}
+        shell: bash
+        env:
+          CONFIGURATION: ${{ inputs.configuration || 'Release' }}
+        run: |
+          echo "Configuration: $CONFIGURATION"
+          dotnet --info
+          docker version
     
       - name: Read project files
         shell: bash
