@@ -1,0 +1,16 @@
+name: Mission Control CI
+
+on: push
+
+jobs:
+  hello:
+    runs-on: ubuntu-24.04
+    steps:
+    
+      - name: Przywitaj się
+        shell: bash
+        run: echo "Hello, World!"
+
+      - name: Show Current Date
+        shell: bash
+        run: date
