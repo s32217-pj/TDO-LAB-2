@@ -26,42 +26,34 @@ on:
         required: true
 
 jobs:
-  hello:
+  backend:
     runs-on: ubuntu-24.04
+
+    env:
+      CI: true
+      BUILD_CONFIGURATION: ${{ inputs.build_configuration || 'Release' }}
+
     steps:
-
       - uses: actions/checkout@v4
-
       - uses: actions/setup-dotnet@v4
         with:
           global-json-file: global.json
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
+      - name: Docker Test
+        run: docker version
 
-      - name: Test .NET&Node
-        shell: bash
+      - name: Validate lockfiles
         run: |
-          test -f MissionControl.slnx
-          test -f global.json
-          test -f .nvmrc
-          dotnet --version
-          node --version
-          npm --version
+          # Enable strict mode: exit on errors, undefined variables, and failed commands in pipelines.
+          set -euo pipefail
+          test -f backend.tests/packages.lock.json
+          test -f backend/packages.lock.json
+        
+      - name: Restore dependencies
+        run: dotnet restore --locked-mode
+      
+      - name: Build
+        run: dotnet build --configuration "$BUILD_CONFIGURATION"
 
-      - name: Extra diagnostics
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.extra_diagnostics }}
-        shell: bash
-        env:
-          CONFIGURATION: ${{ inputs.configuration || 'Release' }}
-        run: |
-          echo "Configuration: $CONFIGURATION"
-          dotnet --info
-          docker version
-
-      - name: Read project files
-        shell: bash
-        run: |
-          pwd
-          ls -la
+      - name: Test
+        run: dotnet test --configuration "$BUILD_CONFIGURATION"
