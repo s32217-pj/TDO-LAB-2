@@ -62,6 +62,7 @@ jobs:
   frontend:
     name: Frontend
     runs-on: ubuntu-24.04
+
     defaults:
       run:
         working-directory: frontend
@@ -76,16 +77,13 @@ jobs:
         run: |
           set -euo pipefail
           test -f ../.nvmrc
-          test -f frontend/package-lock.json
-
-          node --version
-          npm --version
+          test -f package-lock.json
 
       - name: Install dependencies
         run: npm ci
 
       - name: Build
-        run: npm build
-      
+        run: npm run build
+
       - name: Test
         run: npm test
