@@ -60,6 +60,11 @@ jobs:
           dotnet --info
           docker version
     
+      - name: Controlled Failure
+        run: |
+          printf '::error file=README.md,line=1::Kontrolowany blad konfiguracji CI\n'
+          exit 1
+
       - name: Read project files
         shell: bash
         run: |
