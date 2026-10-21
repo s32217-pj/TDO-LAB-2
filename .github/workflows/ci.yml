@@ -25,14 +25,40 @@ on:
         default: false
         required: true
 
+permissions:
+  contents: read
+
 jobs:
+
+  secrets:
+    runs-on: ubuntu-24.04
+    name: Secrets
+    env:
+      LAB_LABEL: ${{ vars.LAB_LABEL }}
+
+    steps:
+      - name: Show lab label
+        run: |
+          echo "Lab label: ${LAB_LABEL}"
+
+      - name: Check demo token
+        env: 
+          LAB_DEMO_TOKEN: ${{ secrets.LAB_DEMO_TOKEN }}
+        run: |
+          if [[ -n "$LAB_DEMO_TOKEN" ]]; then
+            echo "demo token configured"
+          else
+            echo "demo token not configured"
+          fi
+
+
   backend:
     name: Backend
     runs-on: ubuntu-24.04
 
     env:
       CI: true
-      BUILD_CONFIGURATION: ${{ inputs.build_configuration || 'Release' }}
+      BUILD_CONFIGURATION: ${{ inputs.configuration || 'Release' }}
 
     steps:
       - uses: actions/checkout@v4
