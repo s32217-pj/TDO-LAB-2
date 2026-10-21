@@ -4,9 +4,9 @@ run-name: "${{ github.event_name }} - ${{ inputs.configuration || 'Release' }}"
 
 on: 
   push:
-    branches: [main]
+    branches: [main, feature/pr-ci]
   pull_request:
-    branches: [main]
+    branches: [main, feature/pr-ci]
   workflow_dispatch:
     inputs:
 
@@ -25,13 +25,40 @@ on:
         default: false
         required: true
 
+permissions:
+  contents: read
+
 jobs:
+
+  secrets:
+    runs-on: ubuntu-24.04
+    name: Secrets
+    env:
+      LAB_LABEL: ${{ vars.LAB_LABEL }}
+
+    steps:
+      - name: Show lab label
+        run: |
+          echo "Lab label: ${LAB_LABEL}"
+
+      - name: Check demo token
+        env: 
+          LAB_DEMO_TOKEN: ${{ secrets.LAB_DEMO_TOKEN }}
+        run: |
+          if [[ -n "$LAB_DEMO_TOKEN" ]]; then
+            echo "demo token configured"
+          else
+            echo "demo token not configured"
+          fi
+
+
   backend:
+    name: Backend
     runs-on: ubuntu-24.04
 
     env:
       CI: true
-      BUILD_CONFIGURATION: ${{ inputs.build_configuration || 'Release' }}
+      BUILD_CONFIGURATION: ${{ inputs.configuration || 'Release' }}
 
     steps:
       - uses: actions/checkout@v4
@@ -57,3 +84,52 @@ jobs:
 
       - name: Test
         run: dotnet test --configuration "$BUILD_CONFIGURATION"
+
+      - name: Upload test report
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-results-${{ github.run_id }}-${{ github.run_attempt }}
+          path: TestResults/backend.trx
+          if-no-files-found: warn
+          retention-days: 7
+
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-24.04
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Test
+        run: |
+          set -euo pipefail
+          test -f ../.nvmrc
+          test -f package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Test
+        run: npm test
+
+      - name: Upload test report
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-test-results-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            frontend/test-results/junit.xml
+            frontend/test-results/results.json
+          if-no-files-found: warn
+          retention-days: 7
