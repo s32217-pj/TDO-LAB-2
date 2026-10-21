@@ -7,7 +7,7 @@ public sealed record MissionRequest(string Name, string Status, DateOnly? Launch
         var errors = new Dictionary<string, string[]>();
         if (string.IsNullOrWhiteSpace(Name))
         {
-            errors["name"] = ["Nazwa misji jest wymagana."];
+            //errors["name"] = ["Nazwa misji jest wymagana."];
         }
         else if (Name.Length > 120)
         {
