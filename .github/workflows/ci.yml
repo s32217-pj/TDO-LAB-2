@@ -59,6 +59,15 @@ jobs:
       - name: Test
         run: dotnet test --configuration "$BUILD_CONFIGURATION"
 
+      - name: Upload test report
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-results-${{ github.run_id }}-${{ github.run_attempt }}
+          path: TestResults/backend.trx
+          if-no-files-found: warn
+          retention-days: 7
+
   frontend:
     name: Frontend
     runs-on: ubuntu-24.04
@@ -87,3 +96,14 @@ jobs:
 
       - name: Test
         run: npm test
+
+      - name: Upload test report
+        if: ${{ always() }}
+        uses: action/upload-artifact@v4
+        with:
+          name: frontend-test-results-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            frontend/test-results/junit.xml
+            frontend/test-results/results.json
+          if-no-files-found: warn
+          retention-days: 7
