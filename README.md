@@ -1,6 +1,7 @@
 # Laboratorium 02 — CI i GitHub Actions
 
 ## He he mala zmiana w readme
+## A teraz sprawdzimy czy dziala ruleset
 
 Publiczny template do drugiego laboratorium Technologie DevOps.
 
