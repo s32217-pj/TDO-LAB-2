@@ -75,7 +75,41 @@ jobs:
           set -euo pipefail
           test -f backend.tests/packages.lock.json
           test -f backend/packages.lock.json
-        
+
+      - name: Generate backend report metadata
+        id: metadata
+        shell: bash
+        run: |
+          echo "report_name=backend-report-${{ github.run_id }}"-${{ github.run_attempt }} >> "$GITHUB_OUTPUT"
+
+      - name: Generate backend report
+        shell: bash
+        run: |
+          mkdir -p backend/reports
+          echo "REPORT_COMPONENT=backend" >> "$GITHUB_ENV"
+          echo "Backend report placeholder" > backend/reports/report.txt
+
+      - name: Verify backend envinronment
+        shell: bash
+        run: |
+          echo "REPORT_COMPONENT=$REPORT_COMPONENT"
+          test "$REPORT_COMPONENT" = "backend"
+      
+      - name: Display backend report name
+        env:
+            REPORT_NAME: ${{ steps.metadata.outputs.report_name }}
+        shell: bash
+        run: |
+          echo "Report name: $REPORT_NAME"
+
+      - name: Upload backend report
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.metadata.outputs.report_name }}
+          path: backedn/reports/
+          if-no-files-found: error
+
+          
       - name: Restore dependencies
         run: dotnet restore --locked-mode
       
