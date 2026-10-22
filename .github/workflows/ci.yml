@@ -106,7 +106,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.metadata.outputs.report_name }}
-          path: backedn/reports/
+          path: backend/reports/
           if-no-files-found: error
 
           
