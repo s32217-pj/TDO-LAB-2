@@ -55,6 +55,8 @@ jobs:
   backend:
     name: Backend
     runs-on: ubuntu-24.04
+    outputs:
+      report_name: ${{ steps.metadata.outputs.report_name }}
 
     env:
       CI: true
@@ -175,3 +177,33 @@ jobs:
             frontend/test-results/results.json
           if-no-files-found: warn
           retention-days: 7
+  
+  summary:
+    name: Summary
+    runs-on: ubuntu-24.04
+    needs: [backend, frontend]
+
+    steps:
+      - name: Verify workspace
+        run: |
+          test ! -e incoming/backend
+          echo "Workspace has no reports from backend"
+
+      - name: Download backend report
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.backend.outputs.report_name }}
+          path: incoming/backend
+
+      - name: List and summarize reports
+        run: |
+          echo "=== Backend files ==="
+          find incoming/backend -type f -print
+
+          backend_count=$(find incoming/backend -type f | wc -l)
+
+          echo "=== Summary ==="
+          echo "Backend files: $backend_count"
+
+          test "$backend_count" -gt 0
+    
