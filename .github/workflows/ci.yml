@@ -114,6 +114,14 @@ jobs:
           test -f ../.nvmrc
           test -f package-lock.json
 
+      - name: Cache npm
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: npm-frontend-v1-${{ runner.os }}-${{ runner.arch }}-node-${{ hashFiles('frontend/.nvmrc') }}-${{ hashFiles('frontend/package-lock.json') }}
+          restore-keys: |
+            npm-frontend-v1-${{ runner.os }}-${{ runner.arch }}-node-${{ hashFiles('frontend/.nvmrc') }}
+
       - name: Install dependencies
         run: npm ci
 
